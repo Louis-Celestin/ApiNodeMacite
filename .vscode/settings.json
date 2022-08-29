@@ -1,0 +1,21 @@
+{
+    "liveServer.settings.port": 5501,
+    "cSpell.words": [
+        "sondages"
+    ],
+    "sqltools.connections": [
+        {
+            "mysqlOptions": {
+                "authProtocol": "default"
+            },
+            "previewLimit": 50,
+            "server": "localhost",
+            "port": 3306,
+            "driver": "MySQL",
+            "name": "MyDb",
+            "database": "macite_db",
+            "username": "root",
+            "password": ""
+        }
+    ]
+}

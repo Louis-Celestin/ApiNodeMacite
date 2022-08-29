@@ -1,0 +1,567 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model cartes {
+  id           Int       @id @default(autoincrement())
+  type_service String
+  emplacement  String
+  created_at   DateTime? @default(now()) @db.Timestamp(0)
+  updated_at   DateTime  @default(now()) @db.Timestamp(0)
+}
+
+model categories {
+  id          Int        @id @default(autoincrement())
+  titre       String
+  description String
+  created_at  DateTime?  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime   @default(now()) @db.Timestamp(0)
+  deleted_at  DateTime?  @db.Timestamp(0)
+  mappings    mappings[]
+}
+
+model collectes {
+  id         Int          @id @default(autoincrement())
+  montant    Int
+  reseau     String
+  IdProjet   Int
+  status     String       @db.VarChar(255)
+  created_at DateTime     @default(now()) @db.Timestamp(0)
+  updated_at DateTime     @default(now()) @db.Timestamp(0)
+  deleted_at DateTime?    @db.Timestamp(0)
+  projets    projets      @relation(fields: [IdProjet], references: [id], onDelete: Cascade, map: "collectes_ibfk_1")
+  participer participer[]
+
+  @@index([IdProjet], map: "IdProjet")
+}
+
+model commenter {
+  id                Int               @id @default(autoincrement())
+  description       String            @db.Text
+  IdUser            Int
+  IdProposIdee      Int
+  created_at        DateTime?         @db.Timestamp(0)
+  updated_at        DateTime?         @db.Timestamp(0)
+  deleted_at        DateTime?         @db.Timestamp(0)
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "commenter_ibfk_1")
+  proposition_idees proposition_idees @relation(fields: [IdProposIdee], references: [id], onDelete: Cascade, map: "commenter_ibfk_2")
+
+  @@index([IdProposIdee], map: "IdProposIdee")
+  @@index([IdUser], map: "IdUser")
+}
+
+model communes {
+  id                                     Int        @id @default(autoincrement())
+  nom                                    String
+  created_at                             DateTime   @default(now()) @db.Timestamp(0)
+  updated_at                             DateTime   @default(now()) @db.Timestamp(0)
+  deleted_at                             DateTime?  @db.Timestamp(0)
+  mappings_communesTomappings_IdCommune  mappings[] @relation("communesTomappings_IdCommune")
+  mappings_communesTomappings_IdResidant mappings[] @relation("communesTomappings_IdResidant")
+  projets                                projets[]
+  users                                  users[]
+}
+
+model failed_jobs {
+  id         BigInt   @id @default(autoincrement()) @db.UnsignedBigInt
+  uuid       String   @unique(map: "failed_jobs_uuid_unique") @db.VarChar(255)
+  connection String   @db.Text
+  queue      String   @db.Text
+  payload    String   @db.LongText
+  exception  String   @db.LongText
+  failed_at  DateTime @default(now()) @db.Timestamp(0)
+}
+
+model informations {
+  id                Int               @id @default(autoincrement())
+  titre             String
+  description       String            @db.Text
+  image             String
+  IdTypeInformation Int
+  IdUser            Int
+  IdCommune         Int
+  created_at        DateTime          @default(now()) @db.Timestamp(0)
+  updated_at        DateTime          @default(now()) @db.Timestamp(0)
+  deleted_at        DateTime?         @db.Timestamp(0)
+  type_informations type_informations @relation(fields: [IdTypeInformation], references: [id], onDelete: Cascade, map: "informations_ibfk_1")
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "informations_ibfk_2")
+
+  @@index([IdCommune], map: "IdCommune")
+  @@index([IdTypeInformation], map: "IdTypeInformations")
+  @@index([IdUser], map: "IdUser")
+}
+
+model liker {
+  id                Int               @id @default(autoincrement())
+  IdUser            Int
+  IdProposIdee      Int
+  created_at        DateTime?         @db.Timestamp(0)
+  updated_at        DateTime?         @db.Timestamp(0)
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "liker_ibfk_1")
+  proposition_idees proposition_idees @relation(fields: [IdProposIdee], references: [id], onDelete: Cascade, map: "liker_ibfk_2")
+
+  @@index([IdProposIdee], map: "IdProposIdee")
+  @@index([IdUser], map: "IdUser")
+}
+
+model mappings {
+  id                                     Int              @id @default(autoincrement())
+  nomProprietaire                        String
+  prenomProprietaire                     String
+  numTel                                 String
+  image                                  String?
+  nomEntreprise                          String
+  descripActivite                        String           @db.Text
+  jsonDonnee                             String?          @db.LongText
+  latitude                               String
+  longitude                              String
+  IdResidant                             Int?
+  IdCategorie                            Int
+  IdCommune                              Int
+  IdUser                                 Int
+  created_at                             DateTime         @default(now()) @db.Timestamp(0)
+  updated_at                             DateTime         @default(now()) @db.Timestamp(0)
+  deleted_at                             DateTime?        @db.Timestamp(0)
+  communes_communesTomappings_IdCommune  communes         @relation("communesTomappings_IdCommune", fields: [IdCommune], references: [id], onDelete: Cascade, map: "mappings_ibfk_1")
+  categories                             categories       @relation(fields: [IdCategorie], references: [id], onDelete: Cascade, map: "mappings_ibfk_2")
+  users                                  users            @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "mappings_ibfk_3")
+  communes_communesTomappings_IdResidant communes?        @relation("communesTomappings_IdResidant", fields: [IdResidant], references: [id], onDelete: Cascade, map: "mappings_ibfk_4")
+  place_parkings                         place_parkings[]
+
+  @@index([IdCategorie], map: "IdCategorie")
+  @@index([IdCommune], map: "IdCommune")
+  @@index([IdResidant], map: "IdResidant")
+  @@index([IdUser], map: "IdUser")
+}
+
+model migrations {
+  id        Int    @id @default(autoincrement()) @db.UnsignedInt
+  migration String @db.VarChar(255)
+  batch     Int
+}
+
+model oauth_access_tokens {
+  id         String    @id @db.VarChar(100)
+  user_id    BigInt?   @db.UnsignedBigInt
+  client_id  BigInt    @db.UnsignedBigInt
+  name       String?   @db.VarChar(255)
+  scopes     String?   @db.Text
+  revoked    Boolean
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_access_tokens_user_id_index")
+}
+
+model oauth_auth_codes {
+  id         String    @id @db.VarChar(100)
+  user_id    BigInt    @db.UnsignedBigInt
+  client_id  BigInt    @db.UnsignedBigInt
+  scopes     String?   @db.Text
+  revoked    Boolean
+  expires_at DateTime? @db.DateTime(0)
+
+  @@index([user_id], map: "oauth_auth_codes_user_id_index")
+}
+
+model oauth_clients {
+  id                     BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  user_id                BigInt?   @db.UnsignedBigInt
+  name                   String    @db.VarChar(255)
+  secret                 String?   @db.VarChar(100)
+  provider               String?   @db.VarChar(255)
+  redirect               String    @db.Text
+  personal_access_client Boolean
+  password_client        Boolean
+  revoked                Boolean
+  created_at             DateTime? @db.Timestamp(0)
+  updated_at             DateTime? @db.Timestamp(0)
+
+  @@index([user_id], map: "oauth_clients_user_id_index")
+}
+
+model oauth_personal_access_clients {
+  id         BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  client_id  BigInt    @db.UnsignedBigInt
+  created_at DateTime? @db.Timestamp(0)
+  updated_at DateTime? @db.Timestamp(0)
+}
+
+model oauth_refresh_tokens {
+  id              String    @id @db.VarChar(100)
+  access_token_id String    @db.VarChar(100)
+  revoked         Boolean
+  expires_at      DateTime? @db.DateTime(0)
+
+  @@index([access_token_id], map: "oauth_refresh_tokens_access_token_id_index")
+}
+
+model options {
+  id         Int       @id @default(autoincrement())
+  libelle    String
+  point      Int?
+  IdSondage  Int
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+  sondages   sondages  @relation(fields: [IdSondage], references: [id], onDelete: Cascade, map: "options_ibfk_1")
+  votes      votes[]
+
+  @@index([IdSondage], map: "IdSondage")
+}
+
+model paiements {
+  id            Int          @id
+  montant       Int
+  numero        String
+  reseau        String       @db.Text
+  status        String       @db.Text
+  IdReservation Int
+  created_at    DateTime?    @db.Timestamp(0)
+  updated_at    DateTime     @default(now()) @db.Timestamp(0)
+  deleted_at    DateTime?    @db.Timestamp(0)
+  reservations  reservations @relation(fields: [IdReservation], references: [id], onDelete: Cascade, map: "paiements_ibfk_1")
+
+  @@index([IdReservation], map: "IdReservation")
+}
+
+model participer {
+  id         Int       @id @default(autoincrement())
+  IdCollecte Int
+  IdUser     Int
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  collectes  collectes @relation(fields: [IdCollecte], references: [id], onDelete: Cascade, map: "participer_ibfk_1")
+  users      users     @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "participer_ibfk_2")
+
+  @@index([IdCollecte], map: "IdCollecte")
+  @@index([IdUser], map: "IdUser")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by the Prisma Client.
+model password_resets {
+  email      String    @db.VarChar(255)
+  token      String    @db.VarChar(255)
+  created_at DateTime? @db.Timestamp(0)
+
+  @@index([email], map: "password_resets_email_index")
+  @@ignore
+}
+
+model personal_access_tokens {
+  id             BigInt    @id @default(autoincrement()) @db.UnsignedBigInt
+  tokenable_type String    @db.VarChar(255)
+  tokenable_id   BigInt    @db.UnsignedBigInt
+  name           String    @db.VarChar(255)
+  token          String    @unique(map: "personal_access_tokens_token_unique") @db.VarChar(64)
+  abilities      String?   @db.Text
+  last_used_at   DateTime? @db.Timestamp(0)
+  created_at     DateTime? @db.Timestamp(0)
+  updated_at     DateTime? @db.Timestamp(0)
+
+  @@index([tokenable_type, tokenable_id], map: "personal_access_tokens_tokenable_type_tokenable_id_index")
+}
+
+model place_parkings {
+  id           Int                   @id @default(autoincrement())
+  codePlace    String                @db.VarChar(255)
+  status       place_parkings_status
+  IdParking    Int
+  created_at   DateTime              @default(now()) @db.Timestamp(0)
+  updated_at   DateTime              @default(now()) @db.Timestamp(0)
+  deleted_at   DateTime?             @db.Timestamp(0)
+  mappings     mappings              @relation(fields: [IdParking], references: [id], onDelete: Cascade, map: "place_parkings_ibfk_1")
+  reservations reservations[]
+
+  @@index([IdParking], map: "IdParking")
+}
+
+model preferences {
+  id                Int               @id @default(autoincrement())
+  titre             String
+  IdUser            Int
+  IdTypeInformation Int
+  created_at        DateTime          @default(now()) @db.Timestamp(0)
+  updated_at        DateTime          @default(now()) @db.Timestamp(0)
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "preferences_ibfk_1")
+  type_informations type_informations @relation(fields: [IdTypeInformation], references: [id], onDelete: Cascade, map: "preferences_ibfk_2")
+
+  @@index([IdTypeInformation], map: "IdTypeInformation")
+  @@index([IdUser], map: "IdUser")
+}
+
+model problemes {
+  id             Int            @id @default(autoincrement())
+  image          String         @db.VarChar(255)
+  commentaire    String         @db.VarChar(155)
+  localisation   String         @db.VarChar(255)
+  IdUser         Int
+  IdTypeProbleme Int
+  IdCommune      Int
+  created_at     DateTime       @default(now()) @db.Timestamp(0)
+  updated_at     DateTime       @default(now()) @db.Timestamp(0)
+  deleted_at     DateTime?      @db.Timestamp(0)
+  users          users          @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "problemes_ibfk_1")
+  type_problemes type_problemes @relation(fields: [IdTypeProbleme], references: [id], onDelete: Cascade, map: "problemes_ibfk_2")
+
+  @@index([IdCommune], map: "IdCommune")
+  @@index([IdTypeProbleme], map: "IdTypeProbleme")
+  @@index([IdUser], map: "IdUser")
+}
+
+model projets {
+  id          Int         @id @default(autoincrement())
+  titre       String
+  description String      @db.Text
+  IdCommune   Int
+  IdUser      Int
+  created_at  DateTime    @default(now()) @db.Timestamp(0)
+  updated_at  DateTime    @default(now()) @db.Timestamp(0)
+  deleted_at  DateTime?   @db.Timestamp(0)
+  communes    communes    @relation(fields: [IdCommune], references: [id], onDelete: Cascade, map: "projets_ibfk_1")
+  users       users       @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "projets_ibfk_2")
+  collectes   collectes[]
+
+  @@index([IdCommune], map: "IdCommune")
+  @@index([IdUser], map: "IdUser")
+}
+
+model proposition_idees {
+  id          Int         @id @default(autoincrement())
+  description String      @db.Text
+  IdUserLiker String      @db.LongText
+  IdUser      Int
+  IdTheme     Int
+  created_at  DateTime    @default(now()) @db.Timestamp(0)
+  updated_at  DateTime    @default(now()) @db.Timestamp(0)
+  users       users       @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "proposition_idees_ibfk_2")
+  themes      themes      @relation(fields: [IdTheme], references: [id], onDelete: Cascade, map: "proposition_idees_ibfk_3")
+  commenter   commenter[]
+  liker       liker[]
+  reagir      reagir[]
+  signaler    signaler[]
+
+  @@index([IdTheme], map: "IdTheme")
+  @@index([IdUser], map: "IdUser")
+}
+
+model reagir {
+  id                Int               @id @default(autoincrement())
+  description       String            @db.Text
+  IdUser            Int
+  IdPropositionIdee Int
+  like              Boolean           @default(false)
+  dislike           Boolean           @default(false)
+  signaler          Boolean           @default(false)
+  created_at        Int
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "reagir_ibfk_1")
+  proposition_idees proposition_idees @relation(fields: [IdPropositionIdee], references: [id], onDelete: Cascade, map: "reagir_ibfk_2")
+
+  @@index([IdPropositionIdee], map: "IdPropositionIdee")
+  @@index([IdUser], map: "IdUser")
+}
+
+model reservations {
+  id                 Int            @id @default(autoincrement())
+  dateReservation    DateTime       @db.DateTime(0)
+  heureStationnement DateTime       @db.Time(0)
+  heureSortie        DateTime       @db.Time(0)
+  prix               Int
+  IdUser             Int
+  IdPlaceParking     Int
+  created_at         DateTime       @default(now()) @db.Timestamp(0)
+  updated_at         DateTime       @default(now()) @db.Timestamp(0)
+  deleted_at         DateTime?      @db.Timestamp(0)
+  users              users          @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "reservations_ibfk_1")
+  place_parkings     place_parkings @relation(fields: [IdPlaceParking], references: [id], onDelete: Cascade, map: "reservations_ibfk_2")
+  paiements          paiements[]
+
+  @@index([IdPlaceParking], map: "IdPlaceParking")
+  @@index([IdUser], map: "IdUser")
+}
+
+model role_permissions {
+  id                Int               @id @default(autoincrement())
+  IdUser            Int
+  IdTypeUtilisateur Int
+  created_at        DateTime          @default(now()) @db.Timestamp(0)
+  updated_at        DateTime          @default(now()) @db.Timestamp(0)
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "role_permissions_ibfk_1")
+  type_utilisateurs type_utilisateurs @relation(fields: [IdTypeUtilisateur], references: [id], onDelete: Cascade, map: "role_permissions_ibfk_2")
+
+  @@index([IdTypeUtilisateur], map: "IdTypeUtilisateur")
+  @@index([IdUser], map: "IdUser")
+}
+
+model service_adminis {
+  id             Int            @id @default(autoincrement())
+  statut         String?        @db.VarChar(255)
+  jsonDonnee     String?        @db.LongText
+  nbreExemplaire Int?
+  codeUnique     String?        @db.VarChar(15)
+  copieImage     String?        @db.VarChar(255)
+  IdTypeService  Int?
+  IdUser         Int?
+  created_at     DateTime?      @db.Timestamp(0)
+  updated_at     DateTime       @default(now()) @db.Timestamp(0)
+  deleted_at     DateTime?      @db.Timestamp(0)
+  type_services  type_services? @relation(fields: [IdTypeService], references: [id], onDelete: Cascade, map: "service_adminis_ibfk_1")
+  users          users?         @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "service_adminis_ibfk_2")
+
+  @@index([IdTypeService], map: "IdTypeService")
+  @@index([IdUser], map: "IdUser")
+}
+
+model signaler {
+  id                Int               @id @default(autoincrement())
+  IdUser            Int
+  IdProposIdee      Int
+  created_at        DateTime?         @db.Timestamp(0)
+  updated_at        DateTime?         @db.Timestamp(0)
+  users             users             @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "signaler_ibfk_1")
+  proposition_idees proposition_idees @relation(fields: [IdProposIdee], references: [id], onDelete: Cascade, map: "signaler_ibfk_2")
+
+  @@index([IdProposIdee], map: "IdProposIdee")
+  @@index([IdUser], map: "IdUser")
+}
+
+model sondages {
+  id          Int       @id @default(autoincrement())
+  description String    @db.VarChar(255)
+  IdUser      Int
+  created_at  DateTime  @default(now()) @db.Timestamp(0)
+  updated_at  DateTime  @default(now()) @db.Timestamp(0)
+  IdCommune   Int
+  deleted_at  DateTime? @db.Timestamp(0)
+  users       users     @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "sondages_ibfk_1")
+  options     options[]
+
+  @@index([IdCommune], map: "IdCommune")
+  @@index([IdUser], map: "IdUser")
+}
+
+model themes {
+  id                Int                 @id @default(autoincrement())
+  titre             String
+  created_at        DateTime?           @default(now()) @db.Timestamp(0)
+  updated_at        DateTime?           @default(now()) @db.Timestamp(0)
+  deleted_at        DateTime?           @db.Timestamp(0)
+  proposition_idees proposition_idees[]
+}
+
+model type_informations {
+  id           Int            @id @default(autoincrement())
+  titre        String         @db.VarChar(255)
+  created_at   DateTime       @default(now()) @db.Timestamp(0)
+  updated_at   DateTime       @default(now()) @db.Timestamp(0)
+  deleted_at   DateTime?      @db.Timestamp(0)
+  informations informations[]
+  preferences  preferences[]
+}
+
+model type_problemes {
+  id         Int         @id @default(autoincrement())
+  titre      String
+  created_at DateTime?   @db.Timestamp(0)
+  updated_at DateTime?   @db.Timestamp(0)
+  deleted_at DateTime?   @db.Timestamp(0)
+  problemes  problemes[]
+}
+
+model type_services {
+  id              Int               @id @default(autoincrement())
+  typeService     String            @db.Text
+  created_at      DateTime?         @db.Timestamp(0)
+  updated_at      DateTime          @default(now()) @db.Timestamp(0)
+  deleted_at      DateTime?         @db.Timestamp(0)
+  service_adminis service_adminis[]
+}
+
+model type_utilisateurs {
+  id               Int                @id @default(autoincrement())
+  profil           String             @db.VarChar(225)
+  created_at       DateTime           @default(now()) @db.Timestamp(0)
+  updated_at       DateTime           @default(now()) @db.Timestamp(0)
+  deleted_at       DateTime?          @db.Timestamp(0)
+  role_permissions role_permissions[]
+  users            users[]
+}
+
+model users {
+  id                Int                 @id @default(autoincrement())
+  image             String              @db.VarChar(255)
+  name              String?             @db.Text
+  email             String              @db.VarChar(255)
+  email_verified_at DateTime?           @db.Timestamp(0)
+  password          String              @db.VarChar(255)
+  remember_token    String?             @db.VarChar(100)
+  prenom            String              @db.Text
+  phone             String
+  sexe              String              @db.VarChar(5)
+  date_naissance    DateTime?           @db.Date
+  lieu_naissance    String?
+  IdCommune         Int
+  IdTypeUtilisateur Int
+  created_at        DateTime?           @db.Timestamp(0)
+  last_login        DateTime            @db.DateTime(0)
+  active            Boolean             @default(false)
+  otp               String              @db.VarChar(25)
+  updated_at        DateTime?           @db.Timestamp(0)
+  deleted_at        DateTime?           @db.Timestamp(0)
+  type_utilisateurs type_utilisateurs   @relation(fields: [IdTypeUtilisateur], references: [id], onDelete: Cascade, map: "users_ibfk_1")
+  communes          communes            @relation(fields: [IdCommune], references: [id], onDelete: Cascade, map: "users_ibfk_2")
+  commenter         commenter[]
+  informations      informations[]
+  liker             liker[]
+  mappings          mappings[]
+  participer        participer[]
+  preferences       preferences[]
+  problemes         problemes[]
+  projets           projets[]
+  proposition_idees proposition_idees[]
+  reagir            reagir[]
+  reservations      reservations[]
+  role_permissions  role_permissions[]
+  service_adminis   service_adminis[]
+  signaler          signaler[]
+  sondages          sondages[]
+  votes             votes[]
+
+  @@index([IdCommune], map: "IdCommune")
+  @@index([IdTypeUtilisateur], map: "IdTypeUtilisateur")
+}
+
+model votes {
+  id         Int       @id @default(autoincrement())
+  IdUser     Int
+  IdOption   Int
+  created_at DateTime  @default(now()) @db.Timestamp(0)
+  updated_at DateTime  @default(now()) @db.Timestamp(0)
+  deleted_at DateTime? @db.Timestamp(0)
+  options    options   @relation(fields: [IdOption], references: [id], onDelete: Cascade, map: "votes_ibfk_1")
+  users      users     @relation(fields: [IdUser], references: [id], onDelete: Cascade, map: "votes_ibfk_2")
+
+  @@index([IdOption], map: "IdOption")
+  @@index([IdUser], map: "IdUser")
+}
+
+model websockets_statistics_entries {
+  id                      Int       @id @default(autoincrement()) @db.UnsignedInt
+  app_id                  String
+  peak_connection_count   Int
+  websocket_message_count Int
+  api_message_count       Int
+  created_at              DateTime? @db.Timestamp(0)
+  updated_at              DateTime? @db.Timestamp(0)
+}
+
+enum place_parkings_status {
+  libre
+  occup_e @map("occupée")
+}
