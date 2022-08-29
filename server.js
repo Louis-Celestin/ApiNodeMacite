@@ -5,6 +5,7 @@ const bodyParser = require('body-parser')
 const userRouter = require('./routes/userRoute')
 const propositionRouter = require('./routes/propositionsIdeesRoute')
 const voteRouter = require('./routes/voteSondageRoute')
+const reactionRouter = require("./routes/reactionRoute")
 const cors = require('cors')
 require('dotenv').config()
 const port = process.env.PORT || 3000
@@ -20,6 +21,7 @@ app.use(fielUpload())
 app.use('/api', userRouter)
 app.use('/api',propositionRouter)
 app.use('/api',voteRouter)
+app.use("/api/reaction", reactionRouter);
 app.listen(port,()=>{
     console.log(`This server is running on port : ${port}`)
 })
